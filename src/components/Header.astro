@@ -1,0 +1,138 @@
+---
+import Icon from "./Icon.astro";
+import { nav, person, socials } from "../data/site";
+
+const path = Astro.url.pathname.replace(/\/$/, "") || "/";
+const isActive = (href: string) => (href === "/" ? path === "/" : path.startsWith(href));
+---
+
+<header class="sticky top-0 z-40 border-b border-line bg-paper/85 backdrop-blur-md">
+  <nav class="frame flex h-16 items-center justify-between gap-4" aria-label="Main">
+    <a href="/" class="group inline-flex items-center gap-2.5 font-display text-lg font-bold tracking-tight">
+      <span
+        class:list={["size-2.5 rounded-full", person.openToWork ? "bg-accent" : "bg-muted"]}
+        title={person.openToWork ? "Available for work" : undefined}></span>
+      {person.name}
+    </a>
+
+    <ul class="hidden items-center gap-1 md:flex">
+      {
+        nav.map((item) => (
+          <li>
+            <a
+              href={item.href}
+              aria-current={isActive(item.href) ? "page" : undefined}
+              class:list={[
+                "relative rounded-full px-3.5 py-2 text-[0.95rem] transition-colors hover:text-ink",
+                isActive(item.href) ? "text-ink" : "text-muted",
+              ]}
+            >
+              {item.label}
+              {isActive(item.href) && (
+                <span class="absolute inset-x-3.5 -bottom-[13px] h-0.5 bg-ink" aria-hidden="true" />
+              )}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+
+    <div class="flex items-center gap-1">
+      <button
+        type="button"
+        data-open-command
+        class="hidden h-9 items-center gap-2 rounded-full border border-line px-3 text-sm text-muted transition-colors hover:border-ink hover:text-ink sm:inline-flex"
+        aria-label="Open quick menu"
+      >
+        <Icon name="search" size={15} />
+        <kbd class="font-sans" data-shortcut-label>Ctrl K</kbd>
+      </button>
+      <button
+        type="button"
+        data-theme-toggle
+        class="grid size-11 place-items-center rounded-full text-muted transition-colors hover:text-ink"
+        aria-label="Switch theme"
+      >
+        <Icon name="moon" class="dark:hidden" />
+        <Icon name="sun" class="hidden dark:block" />
+      </button>
+      <button
+        type="button"
+        data-open-mobile-nav
+        class="grid size-11 place-items-center rounded-full md:hidden"
+        aria-label="Open menu"
+        aria-haspopup="dialog"
+      >
+        <Icon name="menu" />
+      </button>
+    </div>
+  </nav>
+</header>
+
+<dialog
+  id="mobile-nav"
+  aria-label="Menu"
+  class="m-0 h-dvh max-h-none w-full max-w-none bg-paper p-0 text-ink backdrop:bg-transparent open:flex open:flex-col"
+>
+  <div class="frame flex h-16 shrink-0 items-center justify-between border-b border-line">
+    <span class="font-display text-lg font-bold tracking-tight">{person.name}</span>
+    <button type="button" data-close-mobile-nav class="grid size-11 place-items-center" aria-label="Close menu">
+      <Icon name="close" />
+    </button>
+  </div>
+  <ul class="frame flex flex-col pt-4">
+    {
+      nav.map((item) => (
+        <li class="border-b border-line">
+          <a
+            href={item.href}
+            aria-current={isActive(item.href) ? "page" : undefined}
+            class:list={[
+              "flex items-baseline justify-between py-4 font-display text-4xl font-bold tracking-tight",
+              isActive(item.href) ? "text-accent" : "",
+            ]}
+          >
+            {item.label}
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+  <div class="frame mt-auto flex flex-col gap-3 pb-10 text-muted">
+    <a href={`mailto:${person.email}`} class="text-ink">{person.email}</a>
+    <div class="flex gap-5">
+      {socials.map((s) => <a href={s.href} target="_blank" rel="noopener noreferrer">{s.label}</a>)}
+    </div>
+  </div>
+</dialog>
+
+<script>
+  function init() {
+    // Theme toggle
+    document.querySelectorAll<HTMLButtonElement>("[data-theme-toggle]").forEach((btn) => {
+      btn.onclick = () => {
+        const dark = !document.documentElement.classList.contains("dark");
+        document.documentElement.classList.toggle("dark", dark);
+        try {
+          localStorage.setItem("theme", dark ? "dark" : "light");
+        } catch {
+          /* storage blocked */
+        }
+      };
+    });
+
+    // Show the right shortcut for the visitor's OS
+    const isMac = /Mac|iPhone|iPad/.test(navigator.platform);
+    document.querySelectorAll("[data-shortcut-label]").forEach((el) => (el.textContent = isMac ? "⌘K" : "Ctrl K"));
+
+    // Mobile menu (native <dialog> gives focus trapping and Escape for free)
+    const dlg = document.getElementById("mobile-nav") as HTMLDialogElement | null;
+    if (!dlg) return;
+    document.querySelector<HTMLButtonElement>("[data-open-mobile-nav]")!.onclick = () => dlg.showModal();
+    dlg.querySelector<HTMLButtonElement>("[data-close-mobile-nav]")!.onclick = () => dlg.close();
+    dlg.querySelectorAll("a").forEach((a) => a.addEventListener("click", () => dlg.close()));
+    const mq = matchMedia("(min-width: 768px)");
+    mq.onchange = () => mq.matches && dlg.open && dlg.close();
+  }
+  document.addEventListener("astro:page-load", init);
+</script>

@@ -1,0 +1,13 @@
+---
+// Shown after sending the contact form when JavaScript is turned off.
+import Base from "../layouts/Base.astro";
+import { contactForm } from "../data/site";
+---
+
+<Base title="Message sent" noindex hideCta>
+  <section class="frame py-24 md:py-36">
+    <h1 class="display-l">Message sent</h1>
+    <p class="mt-6 max-w-[48ch] text-lg text-muted">Thanks for writing. {contactForm.responseTime}</p>
+    <a href="/" class="btn-primary mt-10">Back to home</a>
+  </section>
+</Base>

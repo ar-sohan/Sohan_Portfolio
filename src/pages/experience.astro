@@ -1,0 +1,93 @@
+---
+import Base from "../layouts/Base.astro";
+import PageHeader from "../components/PageHeader.astro";
+import Icon from "../components/Icon.astro";
+import { certifications, education, experience, person } from "../data/site";
+---
+
+<Base title="Experience" description={`Where ${person.name} has worked and studied.`}>
+  <PageHeader title="Experience" intro="Where I've worked, what I owned and what came out of it.">
+    {
+      person.resumeUrl && (
+        <a href={person.resumeUrl} target="_blank" rel="noopener" class="btn-ghost mt-8">
+          <Icon name="download" size={18} /> Download CV
+        </a>
+      )
+    }
+  </PageHeader>
+
+  <section class="frame pb-16 md:pb-24" aria-label="Work history">
+    <ol class="border-t border-line">
+      {
+        experience.map((job) => (
+          <li class="grid gap-3 border-b border-line py-10 md:grid-cols-12 md:gap-6 md:py-12">
+            <p class="tabular-nums text-muted md:col-span-3">
+              {job.start} – {job.end}
+              {job.end === "Present" && (
+                <span class="ml-2 inline-block rounded-full bg-accent px-2 py-0.5 align-middle text-xs font-medium text-accent-ink">
+                  Now
+                </span>
+              )}
+            </p>
+            <div class="md:col-span-9">
+              <h2 class="text-[clamp(1.5rem,3vw,2rem)] font-bold leading-tight tracking-tight">
+                {job.role}, {job.company}
+              </h2>
+              {job.location && <p class="mt-1 text-muted">{job.location}</p>}
+              <p class="mt-4 max-w-[62ch] text-lg">{job.summary}</p>
+              <ul class="mt-4 max-w-[62ch] list-disc space-y-2 pl-5 text-muted marker:text-accent">
+                {job.points.map((pt) => (
+                  <li>{pt}</li>
+                ))}
+              </ul>
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+  </section>
+
+  <section class="frame pb-20 md:pb-28" aria-labelledby="edu-title">
+    <div class="grid gap-8 md:grid-cols-12 md:gap-6">
+      <h2 id="edu-title" class="display-m md:col-span-3">Education</h2>
+      <ol class="md:col-span-9">
+        {
+          education.map((d) => (
+            <li class="border-b border-line pb-6 last:border-0">
+              <p class="text-xl font-semibold">{d.degree}</p>
+              <p class="mt-1 text-muted">
+                {d.school}, {d.start} – {d.end}
+              </p>
+              {d.note && <p class="mt-2 text-muted">{d.note}</p>}
+            </li>
+          ))
+        }
+      </ol>
+
+      {
+        certifications.length > 0 && (
+          <>
+            <h2 class="display-m mt-10 md:col-span-3">Certifications</h2>
+            <ul class="divide-y divide-line md:col-span-9 md:mt-10">
+              {certifications.map((c) => (
+                <li>
+                  <a
+                    href={c.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 py-4 hover:text-accent"
+                  >
+                    <span class="font-medium">{c.label}</span>
+                    <span class="text-muted">
+                      {c.issuer}, {c.year}
+                    </span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </>
+        )
+      }
+    </div>
+  </section>
+</Base>

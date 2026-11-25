@@ -1,0 +1,31 @@
+---
+import { person } from "../data/site";
+
+// Rendered at build time, then kept live in the browser.
+const fmt = () =>
+  new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "2-digit", timeZone: person.timeZone })
+    .format(new Date())
+    .toLowerCase();
+---
+
+<time data-clock data-tz={person.timeZone} class="tabular-nums">{fmt()}</time>
+
+<script>
+  let timer: ReturnType<typeof setInterval> | undefined;
+  function tick() {
+    document.querySelectorAll<HTMLElement>("[data-clock]").forEach((el) => {
+      el.textContent = new Intl.DateTimeFormat("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+        timeZone: el.dataset.tz,
+      })
+        .format(new Date())
+        .toLowerCase();
+    });
+  }
+  document.addEventListener("astro:page-load", () => {
+    tick();
+    clearInterval(timer);
+    timer = setInterval(tick, 15_000);
+  });
+</script>

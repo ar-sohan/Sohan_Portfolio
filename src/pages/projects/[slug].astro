@@ -1,0 +1,101 @@
+---
+import { getCollection, render, type CollectionEntry } from "astro:content";
+import { Image } from "astro:assets";
+import Base from "../../layouts/Base.astro";
+import Icon from "../../components/Icon.astro";
+
+export async function getStaticPaths() {
+  const all = (await getCollection("projects")).sort(
+    (a, b) => b.data.year - a.data.year || a.data.order - b.data.order,
+  );
+  return all.map((project, i) => ({
+    params: { slug: project.id },
+    props: { project, next: all[(i + 1) % all.length] },
+  }));
+}
+
+interface Props {
+  project: CollectionEntry<"projects">;
+  next: CollectionEntry<"projects">;
+}
+const { project, next } = Astro.props;
+const { data } = project;
+const { Content } = await render(project);
+---
+
+<Base title={data.title} description={data.summary} image={data.cover.src}>
+  <article>
+    <header class="frame pb-10 pt-10 md:pb-14 md:pt-16">
+      <a href="/projects" class="inline-flex min-h-11 items-center gap-2 text-[0.95rem] text-muted hover:text-ink">
+        <Icon name="arrow-left" size={16} /> All projects
+      </a>
+      <h1 class="display-l mt-6" transition:name={`title-${project.id}`}>{data.title}</h1>
+      <p class="mt-6 max-w-[48ch] font-display text-[clamp(1.35rem,2.6vw,1.9rem)] font-medium leading-snug tracking-tight">
+        {data.summary}
+      </p>
+
+      <dl class="mt-10 grid grid-cols-2 gap-x-6 gap-y-6 border-t border-line pt-6 text-[0.95rem] md:grid-cols-4">
+        <div>
+          <dt class="text-muted">Role</dt>
+          <dd class="mt-1">{data.role}</dd>
+        </div>
+        <div>
+          <dt class="text-muted">Year</dt>
+          <dd class="mt-1">{data.year}</dd>
+        </div>
+        <div class="col-span-2 md:col-span-1">
+          <dt class="text-muted">Built with</dt>
+          <dd class="mt-1">{data.stack.join(", ")}</dd>
+        </div>
+        <div class="col-span-2 md:col-span-1">
+          <dt class="text-muted">Links</dt>
+          <dd class="mt-1 flex flex-wrap gap-x-5 gap-y-1">
+            {data.live && (
+              <a href={data.live} target="_blank" rel="noopener noreferrer" class="link inline-flex items-center gap-1">
+                Live site <Icon name="arrow" size={14} />
+              </a>
+            )}
+            {data.code && (
+              <a href={data.code} target="_blank" rel="noopener noreferrer" class="link inline-flex items-center gap-1">
+                Source code <Icon name="arrow" size={14} />
+              </a>
+            )}
+            {!data.live && !data.code && <span class="text-muted">Private project</span>}
+          </dd>
+        </div>
+      </dl>
+    </header>
+
+    <div class="frame">
+      <Image
+        src={data.cover}
+        alt={data.coverAlt}
+        widths={[640, 960, 1280, 1600]}
+        sizes="(min-width: 1216px) 1120px, 100vw"
+        loading="eager"
+        fetchpriority="high"
+        class="aspect-[3/2] w-full rounded-2xl border border-line object-cover"
+      />
+    </div>
+
+    <div class="frame grid gap-10 py-16 md:grid-cols-12 md:py-24">
+      <div class="prose-case text-lg md:col-span-8 md:col-start-3 [&>*:first-child]:mt-0">
+        <Content />
+      </div>
+    </div>
+  </article>
+
+  {
+    next.id !== project.id && (
+      <nav class="border-t border-line" aria-label="Next project">
+        <a href={`/projects/${next.id}`} class="frame group flex flex-col gap-2 py-14 md:py-20">
+          <span class="text-[0.95rem] text-muted">Next project</span>
+          <span class="inline-flex items-center gap-4 display-l transition-colors group-hover:text-accent">
+            {next.data.title}
+            <Icon name="arrow-right" size={48} class="size-9 transition-transform duration-300 group-hover:translate-x-2 sm:size-12" />
+          </span>
+        </a>
+      </nav>
+    )
+  }
+</Base>

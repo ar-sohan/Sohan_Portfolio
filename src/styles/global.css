@@ -1,0 +1,122 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ── Design tokens: change the palette here ── */
+:root {
+  --paper: #edeef1;
+  --surface: #f7f8fa;
+  --ink: #15171c;
+  --muted: #595e6a;
+  --line: #d3d6dd;
+  --accent: #2a3bff; /* ultramarine */
+  --accent-ink: #ffffff;
+  color-scheme: light;
+}
+.dark {
+  --paper: #101114;
+  --surface: #17181d;
+  --ink: #e8e9ed;
+  --muted: #9a9fab;
+  --line: #26282f;
+  --accent: #8f99ff;
+  --accent-ink: #101114;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --font-display: "Bricolage Grotesque Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Geist Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    scrollbar-gutter: stable;
+  }
+  body {
+    @apply bg-paper text-ink font-sans antialiased;
+    font-size: 1.0625rem;
+    line-height: 1.6;
+  }
+  h1, h2, h3 {
+    @apply font-display;
+    text-wrap: balance;
+  }
+  p { text-wrap: pretty; }
+  ::selection { background: var(--accent); color: var(--accent-ink); }
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+    ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) {
+      animation: none !important;
+    }
+  }
+}
+
+/* ── Reusable pieces ── */
+@utility frame {
+  /* The page column, with faint guide lines on wide screens */
+  @apply relative mx-auto w-full max-w-[76rem] px-5 sm:px-8 lg:border-x lg:border-line lg:px-12;
+}
+@utility btn {
+  @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-5 py-2.5 text-[0.95rem] font-medium transition-colors;
+}
+@utility btn-primary {
+  @apply btn bg-ink text-paper hover:bg-accent hover:text-accent-ink;
+}
+@utility btn-ghost {
+  @apply btn border border-line text-ink hover:border-ink;
+}
+@utility link {
+  @apply underline decoration-line decoration-[1.5px] underline-offset-4 transition-colors hover:decoration-accent;
+}
+@utility display-xl {
+  @apply font-display font-extrabold leading-[0.86] tracking-[-0.05em];
+  font-size: clamp(4.5rem, 17vw, 13rem);
+}
+@utility display-l {
+  @apply font-display font-bold leading-[0.92] tracking-[-0.04em];
+  font-size: clamp(2.75rem, 8vw, 6rem);
+}
+@utility display-m {
+  @apply font-display font-bold leading-[1] tracking-[-0.03em];
+  font-size: clamp(1.9rem, 4vw, 2.75rem);
+}
+
+/* Markdown inside project case studies */
+@utility prose-case {
+  & h2 { @apply mt-14 mb-4 text-[1.75rem] font-bold leading-tight tracking-tight; }
+  & h3 { @apply mt-10 mb-3 text-xl font-semibold; }
+  & p, & ul, & ol { @apply mb-5 max-w-[66ch]; }
+  & ul { @apply list-disc pl-5 marker:text-accent; }
+  & ol { @apply list-decimal pl-5 marker:text-muted; }
+  & li { @apply mb-1.5; }
+  & a { @apply link; }
+  & strong { @apply font-semibold; }
+  & img { @apply my-10 w-full rounded-xl border border-line; }
+  & blockquote { @apply my-8 border-l-2 border-accent pl-5 font-display text-2xl leading-snug; }
+  & code { @apply rounded bg-surface px-1.5 py-0.5 text-[0.9em]; }
+  & pre { @apply mb-6 overflow-x-auto rounded-xl border border-line bg-surface p-4 text-sm; }
+  & pre code { @apply bg-transparent p-0; }
+}
+
+/* Page transition: a quick crossfade, slightly lifted */
+@keyframes vt-out { to { opacity: 0; transform: translateY(-6px); } }
+@keyframes vt-in { from { opacity: 0; transform: translateY(8px); } }
+::view-transition-old(main) { animation: vt-out 160ms ease-in both; }
+::view-transition-new(main) { animation: vt-in 260ms cubic-bezier(0.2, 0.7, 0.2, 1) both; }

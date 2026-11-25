@@ -1,0 +1,102 @@
+---
+import type { CollectionEntry } from "astro:content";
+import { Image, getImage } from "astro:assets";
+import Icon from "./Icon.astro";
+
+interface Props {
+  projects: CollectionEntry<"projects">[];
+}
+const { projects } = Astro.props;
+
+// Pre-size the hover previews so the floating image is small and fast.
+const previews = await Promise.all(
+  projects.map((p) => getImage({ src: p.data.cover, width: 640, format: "webp" })),
+);
+---
+
+<ul class="border-t border-line" data-project-index>
+  {
+    projects.map((p, i) => (
+      <li class="border-b border-line">
+        <a
+          href={`/projects/${p.id}`}
+          data-preview={previews[i].src}
+          data-preview-alt={p.data.coverAlt}
+          class="group grid grid-cols-[5.5rem_1fr] items-center gap-x-4 gap-y-1 py-5 sm:grid-cols-[7rem_1fr] md:grid-cols-12 md:gap-x-6 md:py-7"
+        >
+          <Image
+            src={p.data.cover}
+            alt=""
+            width={224}
+            quality={70}
+            class="row-span-2 aspect-[3/2] w-full rounded-md border border-line object-cover md:hidden"
+          />
+          <span
+            class="font-display text-[clamp(1.6rem,4.2vw,3rem)] font-bold leading-none tracking-[-0.035em] transition-[color,transform] duration-300 group-hover:text-accent md:col-span-6 md:group-hover:translate-x-2"
+            transition:name={`title-${p.id}`}
+          >
+            {p.data.title}
+          </span>
+          <span class="text-[0.95rem] text-muted md:col-span-3">{p.data.type}</span>
+          <span class="hidden items-center justify-end gap-6 text-[0.95rem] text-muted md:col-span-3 md:flex">
+            <span class="tabular-nums">{p.data.year}</span>
+            <Icon
+              name="arrow"
+              size={22}
+              class="text-ink transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+            />
+          </span>
+        </a>
+      </li>
+    ))
+  }
+</ul>
+
+<!-- One floating preview shared by every row (desktop + mouse only) -->
+<div
+  data-project-preview
+  aria-hidden="true"
+  class="pointer-events-none fixed left-0 top-0 z-30 hidden w-80 overflow-hidden rounded-xl border border-line bg-surface opacity-0 shadow-xl transition-[opacity,scale] duration-200 [scale:0.92] data-[show]:opacity-100 data-[show]:[scale:1] lg:block"
+>
+  <img alt="" class="aspect-[3/2] w-full object-cover" />
+</div>
+
+<script>
+  function init() {
+    const preview = document.querySelector<HTMLElement>("[data-project-preview]");
+    if (!preview || !matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+    const img = preview.querySelector("img")!;
+    let x = 0, y = 0, cx = 0, cy = 0, raf = 0;
+
+    const loop = () => {
+      // Ease towards the cursor for a soft trailing feel
+      cx += (x - cx) * 0.18;
+      cy += (y - cy) * 0.18;
+      preview.style.transform = `translate(${cx + 28}px, ${cy - 110}px)`;
+      raf = requestAnimationFrame(loop);
+    };
+
+    document.querySelectorAll<HTMLAnchorElement>("[data-project-index] a").forEach((a) => {
+      a.addEventListener("mouseenter", (e) => {
+        img.src = a.dataset.preview!;
+        if (!preview.hasAttribute("data-show")) {
+          cx = x = e.clientX;
+          cy = y = e.clientY;
+        }
+        preview.setAttribute("data-show", "");
+        cancelAnimationFrame(raf);
+        raf = requestAnimationFrame(loop);
+      });
+      a.addEventListener("mousemove", (e) => {
+        x = e.clientX;
+        y = e.clientY;
+      });
+      a.addEventListener("mouseleave", () => {
+        preview.removeAttribute("data-show");
+        setTimeout(() => !preview.hasAttribute("data-show") && cancelAnimationFrame(raf), 220);
+      });
+    });
+    document.addEventListener("astro:before-swap", () => cancelAnimationFrame(raf), { once: true });
+  }
+  document.addEventListener("astro:page-load", init);
+</script>

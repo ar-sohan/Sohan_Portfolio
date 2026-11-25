@@ -1,0 +1,58 @@
+---
+import Icon from "./Icon.astro";
+import Clock from "./Clock.astro";
+import { person, socials, nav } from "../data/site";
+
+interface Props {
+  hideCta?: boolean;
+}
+const { hideCta } = Astro.props;
+---
+
+<footer class="border-t border-line">
+  {
+    !hideCta && (
+      <div class="frame grid gap-10 py-16 md:grid-cols-12 md:py-24">
+        <div class="md:col-span-8">
+          <p class="text-lg text-muted">Got an idea, a role or a question?</p>
+          <a
+            href="/contact"
+            class="group mt-3 inline-flex items-end gap-3 display-l transition-colors hover:text-accent"
+          >
+            Let's talk
+            <Icon
+              name="arrow"
+              size={56}
+              class="mb-1 size-10 shrink-0 transition-transform duration-300 group-hover:-translate-y-1 group-hover:translate-x-1 sm:size-14"
+            />
+          </a>
+        </div>
+        <div class="flex flex-col justify-end gap-2 text-muted md:col-span-4 md:items-end md:text-right">
+          <a href={`mailto:${person.email}`} class="link text-ink">
+            {person.email}
+          </a>
+          <p>
+            <Clock /> in {person.city.split(",")[0]}
+          </p>
+        </div>
+      </div>
+    )
+  }
+  <div class="border-t border-line">
+    <div class="frame flex flex-col gap-5 py-8 text-[0.95rem] text-muted md:flex-row md:items-center md:justify-between">
+      <p>© {new Date().getFullYear()} {person.name}</p>
+      <ul class="flex flex-wrap gap-x-6 gap-y-2">
+        {nav.slice(1).map((n) => <li><a href={n.href} class="hover:text-ink">{n.label}</a></li>)}
+        {
+          socials.map((s) => (
+            <li>
+              <a href={s.href} target="_blank" rel="noopener noreferrer" class="hover:text-ink">
+                {s.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+</footer>

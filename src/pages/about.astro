@@ -1,0 +1,77 @@
+---
+import Base from "../layouts/Base.astro";
+import PageHeader from "../components/PageHeader.astro";
+import { about, person } from "../data/site";
+---
+
+<Base title="About" description={`About ${person.name}: background, skills and what I'm working on now.`}>
+  <PageHeader title="About me" />
+
+  <section class="frame pb-16 md:pb-24">
+    <div class="grid gap-12 md:grid-cols-12 md:gap-6">
+      <div class="md:col-span-4">
+        {
+          person.photo ? (
+            <img
+              src={person.photo}
+              alt={`Portrait of ${person.name}`}
+              width="480"
+              height="600"
+              class="aspect-[4/5] w-full max-w-xs rounded-2xl border border-line object-cover"
+            />
+          ) : (
+            <div class="grid aspect-[4/5] w-full max-w-xs place-items-center rounded-2xl border border-dashed border-line text-center text-sm text-muted">
+              <span class="px-6">Add your photo: set <code>photo</code> in src/data/site.ts</span>
+            </div>
+          )
+        }
+      </div>
+      <div class="space-y-6 text-lg md:col-span-7 md:col-start-6">
+        {about.paragraphs.map((p, i) => <p class:list={["max-w-[62ch]", i === 0 && "font-display text-2xl font-medium leading-snug tracking-tight md:text-[1.75rem]"]}>{p}</p>)}
+      </div>
+    </div>
+  </section>
+
+  <section class="frame pb-16 md:pb-24" aria-labelledby="now-title">
+    <div class="grid gap-8 border-t border-line pt-10 md:grid-cols-12 md:gap-6">
+      <div class="md:col-span-4">
+        <h2 id="now-title" class="display-m">Right now</h2>
+        <p class="mt-3 text-muted">What I'm spending my time on these days.</p>
+      </div>
+      <dl class="divide-y divide-line md:col-span-7 md:col-start-6">
+        {
+          about.now.map((n) => (
+            <div class="grid gap-1 py-4 first:pt-0 sm:grid-cols-[8rem_1fr] sm:gap-6">
+              <dt class="text-muted">{n.label}</dt>
+              <dd>{n.text}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+  </section>
+
+  <section class="frame pb-20 md:pb-28" aria-labelledby="skills-title">
+    <div class="grid gap-8 border-t border-line pt-10 md:grid-cols-12 md:gap-6">
+      <div class="md:col-span-4">
+        <h2 id="skills-title" class="display-m">What I work with</h2>
+      </div>
+      <dl class="grid grid-cols-2 gap-x-6 gap-y-8 md:col-span-7 md:col-start-6 lg:grid-cols-4">
+        {
+          about.skills.map((g) => (
+            <div>
+              <dt class="font-semibold">{g.group}</dt>
+              <dd class="mt-2">
+                <ul class="space-y-1 text-muted">
+                  {g.items.map((s) => (
+                    <li>{s}</li>
+                  ))}
+                </ul>
+              </dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+  </section>
+</Base>
